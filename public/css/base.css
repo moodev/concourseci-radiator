@@ -1,0 +1,91 @@
+body {
+    font-size: 12px;
+    line-height: 1.4;
+    margin: 0;
+    background: #273747;
+    color: #E6E7E8;
+    font-family: monospace;
+}
+#content {
+    margin: 10px;
+}
+
+.pipeline {
+    float: left;
+    height: 150px;
+    width: 250px;
+    margin: 20px;
+    background: #2ECC71;
+    position: relative;
+}
+
+.paused {
+    background: #666;
+}
+.paused H2 {
+    color: #aeaeae;
+    z-index: 2;
+}
+
+.pipeline-name {
+    color: #FFF;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
+.pipeline-job {
+    height: 100%;
+    width: auto;
+    float: left;
+}
+.pipeline .failed {
+    background-color: #E74C3C;
+}
+.pipeline .pending {
+    background-color: #BDC3C7;
+}
+.pipeline .errored {
+    background-color: #E67E22;
+}
+.pipeline .aborted {
+    background-color: #8F4B2D;
+}
+.pipeline .paused {
+    background-color: #3498DB;
+}
+.pipeline .started {
+   background-color: #F1C40F;
+   -webkit-animation: small-started-ripple-concourse 1s linear infinite;
+   animation: small-started-ripple-concourse 1s linear infinite;
+   -webkit-border-radius: 1px;
+   -moz-border-radius: 1px;
+   border-radius: 1px;
+}
+#clear {
+    clear: both;
+}
+
+
+@-webkit-keyframes small-started-ripple-concourse {
+    0% {
+        box-shadow:0 0 0 -4px #273747,0 0 0 0 #F1C40F,0 0 0 4px #273747,0 0 0 8px #F1C40F
+    }
+    50% {
+        box-shadow:0 0 0 2px #273747,0 0 0 4px #F1C40F,0 0 0 8px #273747,0 0 0 12px rgba(241,196,15,.5)
+    }
+    100% {
+        box-shadow:0 0 0 4px #273747,0 0 0 8px #F1C40F,0 0 0 12px #273747,0 0 0 16px transparent
+    }
+}
+@keyframes small-started-ripple-concourse {
+    0% {
+        box-shadow:0 0 0 -4px #273747,0 0 0 0 #F1C40F,0 0 0 4px #273747,0 0 0 8px #F1C40F
+    }
+    50% {
+        box-shadow:0 0 0 2px #273747,0 0 0 4px #F1C40F,0 0 0 8px #273747,0 0 0 12px rgba(241,196,15,.5)
+    }
+    100% {
+        box-shadow:0 0 0 4px #273747,0 0 0 8px #F1C40F,0 0 0 12px #273747,0 0 0 16px transparent
+    }
+}
