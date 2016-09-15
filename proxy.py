@@ -26,7 +26,11 @@ def redirectPipelines():
 
     '''
 
-    r = requests.get(baseUrl + '/api/v1/pipelines', auth=(ciUsername, ciPassword))
+    try:
+        r = requests.get(baseUrl + '/api/v1/pipelines', auth=(ciUsername, ciPassword))
+    except requests.ConnectionError as e:
+        return Response(status=500)
+
 
     # iterate over pipelines and find the status for each
     lstPipelines = []
@@ -98,4 +102,4 @@ def redirectPipelines():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 3001))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=False)

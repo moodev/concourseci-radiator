@@ -15,20 +15,23 @@ var ParentBox = React.createClass({
         
         if (res.status == "200") {
           // change DOM only if 200, ignoring 304
-          this.setState({data: data});
+          this.setState({data: data, status: '200'});
         }
 
       }.bind(this),
 
       error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
+        this.setState({
+                        data:[], 
+                        status: xhr.status
+                      });
       }.bind(this)
 
     });
   },
 
   getInitialState: function() {
-    return {data: []};
+    return {data: [], status: '200'};
   },
 
   componentDidMount: function() {
@@ -39,8 +42,8 @@ var ParentBox = React.createClass({
   render: function() {
     return (
       <div className="concourse-radiator">
-        <h1>Moo Builds</h1>
-        <PipelineList data={this.state.data} />
+        <h1>ConcourseCI Builds</h1>
+        <PipelineList data={this.state.data} status={this.state.status} />
       </div>
     );
   }
@@ -53,11 +56,25 @@ var PipelineList = React.createClass({
 
   render: function() {
 
-    var commentNodes = this.props.data.map(function(pipeline) {
-      return (
-        <Pipeline key={pipeline.name} name={pipeline.name} url={pipeline.url} paused={pipeline.paused} jobs={pipeline.jobs} />
-      );
-    });
+    var commentNodes = '';
+
+    // if there is an error on the proxy server, then show the Error message
+    if (this.props.status != "200") {
+      commentNodes = (
+        <div id="error-block">
+          <img id="error-image" src="/images/buckleup.svg" />
+          <h1>ConcourseCI is not reachable.</h1>
+        </div>
+      )
+    }
+    // otherwise, make a list of pipelines
+    else if (this.props.data.length > 0) {
+      commentNodes = this.props.data.map(function(pipeline) {
+        return (
+          <Pipeline key={pipeline.name} name={pipeline.name} url={pipeline.url} paused={pipeline.paused} jobs={pipeline.jobs} />
+        );
+      });
+    }
 
     return (
       <div key='container-list' className="pipeline-list">
