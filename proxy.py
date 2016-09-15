@@ -26,10 +26,21 @@ def redirectPipelines():
 
     '''
 
+    # Then, get list of all the pipelines
     try:
         r = requests.get(baseUrl + '/api/v1/pipelines', auth=(ciUsername, ciPassword))
     except requests.ConnectionError as e:
-        return Response(status=500)
+        return Response("The ConcourseCI is not reachable", status=500)
+
+
+    # Check that at least one worker is available
+    try:
+        responseWorkers = requests.get(baseUrl + '/api/v1/workers', auth=(ciUsername, ciPassword))
+        if len(responseWorkers.json()) == 0:
+            return Response("There are no workers available!", status=500)
+
+    except requests.ConnectionError as e:
+        return Response("The ConcourseCI is not reachable", status=500)
 
 
     # iterate over pipelines and find the status for each
@@ -102,4 +113,4 @@ def redirectPipelines():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 3001))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(host='0.0.0.0', port=port, debug=True)

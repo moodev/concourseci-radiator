@@ -15,7 +15,7 @@ var ParentBox = React.createClass({
         
         if (res.status == "200") {
           // change DOM only if 200, ignoring 304
-          this.setState({data: data, status: '200'});
+          this.setState({data: data, status: '200', statusText: ''});
         }
 
       }.bind(this),
@@ -23,7 +23,8 @@ var ParentBox = React.createClass({
       error: function(xhr, status, err) {
         this.setState({
                         data:[], 
-                        status: xhr.status
+                        status: xhr.status,
+                        statusText: xhr.responseText
                       });
       }.bind(this)
 
@@ -31,7 +32,7 @@ var ParentBox = React.createClass({
   },
 
   getInitialState: function() {
-    return {data: [], status: '200'};
+    return {data: [], status: '200', statusText: ''};
   },
 
   componentDidMount: function() {
@@ -43,7 +44,7 @@ var ParentBox = React.createClass({
     return (
       <div className="concourse-radiator">
         <h1>ConcourseCI Builds</h1>
-        <PipelineList data={this.state.data} status={this.state.status} />
+        <PipelineList data={this.state.data} status={this.state.status} statusText={this.state.statusText} />
       </div>
     );
   }
@@ -59,11 +60,11 @@ var PipelineList = React.createClass({
     var commentNodes = '';
 
     // if there is an error on the proxy server, then show the Error message
-    if (this.props.status != "200") {
+    if (this.props.status == "500") {
       commentNodes = (
         <div id="error-block">
           <img id="error-image" src="/images/buckleup.svg" />
-          <h1>ConcourseCI is not reachable.</h1>
+          <h1>{this.props.statusText}</h1>
         </div>
       )
     }
