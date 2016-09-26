@@ -29,18 +29,16 @@ def redirectPipelines():
     # Then, get list of all the pipelines
     try:
         r = requests.get(baseUrl + '/api/v1/pipelines', auth=(ciUsername, ciPassword))
+        r.raise_for_status()
     except requests.ConnectionError as e:
         return Response("The ConcourseCI is not reachable", status=500)
-
+    except requests.exceptions.HTTPError as e:
+        return Response("The ConcourseCI is not reachable, status code: " + str(e.response.status_code) + ", reason: " + e.response.reason, status=500)
 
     # Check that at least one worker is available
-    try:
-        responseWorkers = requests.get(baseUrl + '/api/v1/workers', auth=(ciUsername, ciPassword))
-        if len(responseWorkers.json()) == 0:
-            return Response("There are no workers available!", status=500)
-
-    except requests.ConnectionError as e:
-        return Response("The ConcourseCI is not reachable", status=500)
+    responseWorkers = requests.get(baseUrl + '/api/v1/workers', auth=(ciUsername, ciPassword))
+    if len(responseWorkers.json()) == 0:
+        return Response("There are no workers available!", status=500)
 
 
     # iterate over pipelines and find the status for each
@@ -89,7 +87,7 @@ def redirectPipelines():
     requestEtag = request.headers.get('If-None-Match', '')
 
     if requestEtag == etag:
-        # the concourse status wasn't modify. Return only "not modified" response
+        # the concourse status wasn't modify. Return only "not modified" status code, avoiding to refresh the page
         return Response(
             status=304,
             mimetype='application/json',
@@ -100,7 +98,7 @@ def redirectPipelines():
             })
 
     else:
-        # there were changes since the last call. Return full request
+        # there were changes since the last call. Return the full response
         return Response(
             jsonResponse,
             mimetype='application/json',
