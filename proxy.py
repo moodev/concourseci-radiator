@@ -19,6 +19,7 @@ ciUsername = app.config.get('CONCOURSE_USERNAME', 'admin')
 ciPassword = app.config.get('CONCOURSE_PASSWORD', 'admin')
 ciTeam = app.config.get('CONCOURSE_TEAM', 'main')
 
+# cached bearer token
 bearerToken = ''
 idx = 0
 
@@ -125,8 +126,8 @@ def redirectPipelines():
 
 def _getAuthenticationHeader():
     '''
-        Method that returns the proper header for an authentication
-        and it updates the bearer token periodically, because token 
+        Method that returns the cached header for an authentication
+        and updates the bearer token periodically, because token 
         can be expired.
     '''
     global idx
@@ -157,8 +158,8 @@ def _getAuthenticationHeader():
 if __name__ == '__main__':
 
     # set debugging level to "ERROR"
-    #import logging
-    #logging.basicConfig(level=logging.ERROR)
+    import logging
+    logging.basicConfig(level=logging.ERROR)
 
     port = int(os.environ.get('PORT', 3001))
     app.run(host='0.0.0.0', port=port, debug=False)
