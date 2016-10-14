@@ -19,8 +19,8 @@ ciUsername = app.config.get('CONCOURSE_USERNAME', 'admin')
 ciPassword = app.config.get('CONCOURSE_PASSWORD', 'admin')
 ciTeam = app.config.get('CONCOURSE_TEAM', 'main')
 
-# header with auth token
-tokenHeader = ''
+bearerToken = ''
+idx = 0
 
 @app.route('/api/v1/pipelines', methods=['GET'])
 def redirectPipelines():
@@ -30,14 +30,17 @@ def redirectPipelines():
 
     '''
 
-    # Then, get list of all the pipelines
+    # Get fresh auth header
+    tokenHeader = _getAuthenticationHeader()
+
+    # Get list of all the pipelines
     try:
         r = requests.get(baseUrl + '/api/v1/pipelines', headers=tokenHeader)
         r.raise_for_status()
     except requests.ConnectionError as e:
-        return Response("The ConcourseCI is not reachable", status=500)
+        return Response("The ConcourseCI is not reachable", status=500, headers={'Etag': ''})
     except requests.exceptions.HTTPError as e:
-        return Response("The ConcourseCI is not reachable, status code: " + str(e.response.status_code) + ", reason: " + e.response.reason, status=500)
+        return Response("The ConcourseCI is not reachable, status code: " + str(e.response.status_code) + ", reason: " + e.response.reason, status=500, headers={'Etag': ''})
 
     # Check that at least one worker is available
     try:
@@ -45,10 +48,10 @@ def redirectPipelines():
         responseWorkers = requests.get(baseUrl + '/api/v1/workers', headers=tokenHeader)
         responseWorkers.raise_for_status()
         if len(responseWorkers.json()) == 0:
-            return Response("There are no workers available!", status=500)
+            return Response("There are no workers available!", status=500, headers={'Etag': ''})
 
     except requests.exceptions.HTTPError as e:
-        return Response("The ConcourseCI is not reachable, status code: " + str(e.response.status_code) + ", reason: " + e.response.reason, status=500)
+        return Response("The ConcourseCI is not reachable, status code: " + str(e.response.status_code) + ", reason: " + e.response.reason, status=500, headers={'Etag': ''})
 
 
     # iterate over pipelines and find the status for each
@@ -119,16 +122,43 @@ def redirectPipelines():
             })
 
 
+
+def _getAuthenticationHeader():
+    '''
+        Method that returns the proper header for an authentication
+        and it updates the bearer token periodically, because token 
+        can be expired.
+    '''
+    global idx
+    global bearerToken
+
+    if (idx == 0 or idx > 5000):
+
+        # get the Bearer Token for the given team avoiding to request it again and again
+        try:
+            r = requests.get(baseUrl + '/api/v1/teams/' + ciTeam + '/auth/token', auth=(ciUsername, ciPassword))
+            r.raise_for_status()
+
+            # remember the new
+            bearerToken = r.json()['value']
+            idx = 1
+
+        except requests.exceptions.HTTPError as e:
+            idx = 0
+            return { "Authorization" : "Bearer nonsence" }
+        
+        
+    idx += 1
+    return { "Authorization" : "Bearer " + bearerToken }
+
+
+
+
 if __name__ == '__main__':
 
     # set debugging level to "ERROR"
-    import logging
-    logging.basicConfig(level=logging.ERROR)
-
-    # get the Bearer Token for the given team avoiding to request it again and again
-    r = requests.get(baseUrl + '/api/v1/teams/' + ciTeam + '/auth/token', auth=(ciUsername, ciPassword))
-    r.raise_for_status()
-    tokenHeader = { "Authorization" : "Bearer " + r.json()['value'] }
+    #import logging
+    #logging.basicConfig(level=logging.ERROR)
 
     port = int(os.environ.get('PORT', 3001))
     app.run(host='0.0.0.0', port=port, debug=False)

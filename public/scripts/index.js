@@ -3,17 +3,17 @@ var ParentBox = React.createClass({
   /**
    * Request from the server the list of pipelines
    */
-  _loadCommentsFromServer: function() {
+  _loadPipelinesFromServer: function() {
     
     $.ajax({
       url: this.props.url,
       dataType: 'json',
-      ifModified: true,
       cache: true,
-
+      ifModified: true,
+      contentType: "application/json; charset=UTF-8",
       success: function(data,text,res) {
         
-        if (res.status == "200") {
+        if (res.status === 200) {
           // change DOM only if 200, ignoring 304
           this.setState({data: data, status: '200', statusText: ''});
         }
@@ -36,8 +36,8 @@ var ParentBox = React.createClass({
   },
 
   componentDidMount: function() {
-    this._loadCommentsFromServer();
-    setInterval(this._loadCommentsFromServer, this.props.pollInterval);
+    this._loadPipelinesFromServer();
+    setInterval(this._loadPipelinesFromServer, this.props.pollInterval);
   },
 
   render: function() {
