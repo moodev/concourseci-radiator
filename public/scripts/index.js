@@ -9,6 +9,7 @@ var ParentBox = React.createClass({
       url: this.props.url,
       dataType: 'json',
       cache: true,
+      async: true,
       ifModified: true,
       contentType: "application/json; charset=UTF-8",
       success: function(data,text,res) {
