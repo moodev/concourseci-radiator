@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- 
 
-CONCOURSE_DOMAIN = 'http://concourse.change.me.hostname'
-CONCOURSE_USERNAME = 'admin'
-CONCOURSE_PASSWORD = 'admin'
-CONCOURSE_TEAM = 'main'
+import os
+
+CONCOURSE_DOMAIN = os.getenv("CONCOURSE_URL")
+CONCOURSE_USERNAME = os.getenv("CONCOURSE_USERNAME")
+CONCOURSE_PASSWORD = os.getenv("CONCOURSE_PASSWORD")
+CONCOURSE_TEAM = os.getenv("CONCOURSE_TEAM")
